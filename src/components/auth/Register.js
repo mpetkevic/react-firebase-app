@@ -12,6 +12,14 @@ class Login extends Component {
     password: ''
   };
 
+  componentWillMount() {
+    const { allowregistration } = this.props.settings;
+
+    if (!allowregistration) {
+      this.props.history.push('/login');
+    }
+  }
+
   onChange = e => this.setState({ [e.target.name]: e.target.value });
 
   onSubmit = e => {
@@ -20,12 +28,10 @@ class Login extends Component {
     const { firebase, notifyUser } = this.props;
     const { email, password } = this.state;
 
+    // Register with firebase
     firebase
-      .login({
-        email,
-        password
-      })
-      .catch(err => notifyUser('Wrong credentials', 'error'));
+      .createUser({ email, password })
+      .catch(err => notifyUser('That user is exist', 'error'));
   };
 
   render() {
@@ -42,7 +48,7 @@ class Login extends Component {
                 <span className="text-primary">
                   <i className="fas fa-lock" />
                 </span>{' '}
-                Login
+                Register
               </h1>
               <form onSubmit={this.onSubmit}>
                 <div className="form-group">
@@ -69,7 +75,7 @@ class Login extends Component {
                 </div>
                 <input
                   type="submit"
-                  value="Login"
+                  value="Register"
                   className="btn btn-primary btn-block"
                 />
               </form>
@@ -90,7 +96,8 @@ export default compose(
   firebaseConnect(),
   connect(
     (state, props) => ({
-      notify: state.notify
+      notify: state.notify,
+      settings: state.settings
     }),
     { notifyUser }
   )
